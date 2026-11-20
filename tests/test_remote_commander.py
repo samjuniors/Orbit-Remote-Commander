@@ -40,7 +40,7 @@ class CommanderTest(unittest.TestCase):
         self.assertEqual(result['sha256'], hashlib.sha256(b'hello').hexdigest())
 
     def test_traversal_and_secret_denials(self):
-        for p in ['../other', '/etc/passwd', '.env', '.ssh/key', 'secret.pem', '.env.custom']:
+        for p in ['../other', '..\\\\other', '/etc/passwd', r'C:\\Windows\\system.ini', r'C:relative.txt', r'\\\\server\\share\\file', '.env', '.ssh/key', 'secret.pem', '.env.custom']:
             with self.subTest(p=p):
                 with self.assertRaises(module.Rejected): self.com.read_text(p)
 
