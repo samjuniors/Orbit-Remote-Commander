@@ -9,6 +9,7 @@ import tempfile
 import unittest
 
 SOURCE = Path(__file__).resolve().parents[1] / 'src' / 'orbit_remote_commander.py'
+sys.path.insert(0, str(SOURCE.parent))
 spec = importlib.util.spec_from_file_location('orbit_rc', SOURCE)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
@@ -117,7 +118,7 @@ class CommanderTest(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         rows = [json.loads(line) for line in proc.stdout.splitlines()]
         self.assertEqual([r['id'] for r in rows], [1, 2, 3, 4])
-        self.assertEqual(len(rows[1]['result']['tools']), 5)
+        self.assertEqual(len(rows[1]['result']['tools']), 8)
         self.assertTrue(rows[3]['result']['isError'])
 
 
