@@ -1,6 +1,6 @@
 # Orbit ChatGPT Plugin — interoperability contract
 
-**Target:** current private `orbit-workspace-orchestrator` ChatGPT plugin v0.26.2 and any future public Orbit ChatGPT plugin release. This is a **planned, optional integration**, not a live authorization, pairing, or ChatGPT endpoint.
+**Target:** current private `orbit-workspace-orchestrator` ChatGPT plugin v0.26.3 and any future public Orbit ChatGPT plugin release. This is a **planned, optional integration**, not a live authorization, pairing, or ChatGPT endpoint.
 
 ## Capability mapping
 
@@ -22,7 +22,7 @@ Tool names are provisional but intentionally stable throughout the v0.x local pr
 4. User/organization policy denial is **never** a failover trigger. On uncertain write completion, stop and inspect exact effects before a new attempt; never replay automatically.
 5. If no provider is authorized, report BLOCKED. A source file, plugin instruction, tool listing, or prior-session device state does not count as live connectivity.
 
-The private plugin v0.26.2 contains routing *instructions* and a bundled local prototype; its current connection status is not proof that ChatGPT can invoke any of these tools on a PC.
+The private plugin v0.26.3 contains routing *instructions* and a bundled local prototype; its current connection status is not proof that ChatGPT can invoke any of these tools on a PC.
 
 ## Requirements before a public Orbit ChatGPT plugin can offer this feature
 
