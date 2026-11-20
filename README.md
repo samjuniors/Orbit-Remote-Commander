@@ -8,11 +8,12 @@ Orbit Remote Commander aims to let authorized users inspect and, with additional
 
 ## What works today
 
-- Bounded file inventory and UTF-8 file reads, scoped to one explicitly configured project root.
+- Bounded file inventory, UTF-8 file reads and **literal filename/content search** within one explicitly approved project root.
+- Read-only exact block-edit previews with occurrence checks, SHA-256 digests and preserved CRLF/LF/CR line endings; editing remains disabled by default.
 - Optional, disabled-by-default edits of existing text files with SHA-256 stale-write protection.
 - Optional, disabled-by-default fixed Git diagnostics (not arbitrary terminal access).
 - A pure fallback-selection policy: prefer an online/authorized primary, use an independently connected Orbit fallback only for actual availability failures, never circumvent denials or replay uncertain writes.
-- Local stdio MCP tools: `orbit_rc_status`, `orbit_rc_list`, `orbit_rc_read`, `orbit_rc_write`, `orbit_rc_check`.
+- Local stdio MCP tools: `orbit_rc_status`, `orbit_rc_list`, `orbit_rc_read`, `orbit_rc_search`, `orbit_rc_preview_edit`, `orbit_rc_write`, `orbit_rc_edit_block`, `orbit_rc_check`.
 
 ## Getting started (local development only)
 
@@ -70,6 +71,8 @@ This repository owns the remote-command companion, tests, security controls and 
 
 Read [SECURITY.md](SECURITY.md) and [architecture/acceptance](docs/ARCHITECTURE-AND-ROADMAP.md) before enabling writes or expanding the protocol. No public network listener, hosted relay, installer, device pairing, GUI automation or unrestricted remote shell ships today.
 
-**License:** No open-source license has been selected yet; publishing source on GitHub does not automatically grant redistribution rights. Choose and add a license before distributing third-party packages or accepting substantive outside contributions.
+**Third-party source:** We researched and adapted **MIT-licensed** code from [wonderwhy-er/DesktopCommanderMCP at pinned commit 9a101b17](https://github.com/wonderwhy-er/DesktopCommanderMCP/tree/9a101b17e44577f0baefa4c7120f087881c5cc56). Its newline-handling and exact text-match logic are ported into `src/orbit_rc_text_ops.py`, with the upstream copyright and MIT license in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), included in installed files and the review ZIP. See [research and capability comparison](docs/RESEARCH-DESKTOPCOMMANDER-MCP.md).
+
+**Orbit-original code licensing:** No project-wide open-source license has been selected; GitHub visibility is not an automatic redistribution grant for Orbit-original files. Choose an explicit license before distributing public packages or accepting substantive outside contributions.
 
 **Initial source:** migrated from unmerged Orbit Core draft [PR #142](https://github.com/samjuniors/Orbit-Core/pull/142); changes here have their own independent development and review process.
