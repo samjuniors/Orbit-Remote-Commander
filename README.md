@@ -60,7 +60,7 @@ The standalone CI builds a reproducible **unsigned development candidate ZIP** w
 
 ## Orbit ChatGPT plugin compatibility
 
-The current private Orbit ChatGPT plugin v0.26.3 documents an optional fallback using these `orbit_rc_*` tool names. **The tool contract is aligned at the source/instruction level, not yet proven in live ChatGPT remote sessions.** For future public-plugin support, this project will provide an independently authenticated, opt-in device integration rather than asking users to install or connect Desktop Commander. See [ChatGPT compatibility](docs/CHATGPT-COMPATIBILITY.md), including planned OAuth, pairing, privacy and release gates.
+The current private Orbit ChatGPT plugin v0.26.3 and later documents an optional fallback using these `orbit_rc_*` tool names. **The tool contract is aligned at the source/instruction level, not yet proven in live ChatGPT remote sessions.** For future public-plugin support, this project will provide an independently authenticated, opt-in device integration rather than asking users to install or connect Desktop Commander. See [ChatGPT compatibility](docs/CHATGPT-COMPATIBILITY.md), including planned OAuth, pairing, privacy and release gates.
 
 ## Independent product boundaries
 
