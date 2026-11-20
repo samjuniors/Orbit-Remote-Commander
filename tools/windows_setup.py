@@ -16,7 +16,7 @@ import sys
 import tempfile
 
 SOURCE_DIR = Path(__file__).resolve().parents[1] / "src"
-FILES = ("orbit_remote_commander.py", "orbit_remote_fallback.py", "run_orbit_rc.py")
+FILES = ("orbit_remote_commander.py", "orbit_remote_fallback.py", "orbit_rc_text_ops.py", "run_orbit_rc.py")
 CONFIG_FILE = "config.json"
 MANIFEST_FILE = ".orbit_rc_install.json"
 
