@@ -15,8 +15,13 @@ import shutil
 import sys
 import tempfile
 
-SOURCE_DIR = Path(__file__).resolve().parents[1] / "src"
-FILES = ("orbit_remote_commander.py", "orbit_remote_fallback.py", "orbit_rc_text_ops.py", "run_orbit_rc.py")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_DIR = REPO_ROOT / "src"
+FILES = ("orbit_remote_commander.py", "orbit_remote_fallback.py", "orbit_rc_text_ops.py", "run_orbit_rc.py", "THIRD_PARTY_NOTICES.md")
+
+
+def source_file(name: str) -> Path:
+    return (REPO_ROOT if name == "THIRD_PARTY_NOTICES.md" else SOURCE_DIR) / name
 CONFIG_FILE = "config.json"
 MANIFEST_FILE = ".orbit_rc_install.json"
 
@@ -78,7 +83,7 @@ def plan_install(home: Path, project: str | None) -> dict:
         raise ValueError("Installation root may not be a symlink")
     for name in FILES:
         dest = home / name
-        if not (SOURCE_DIR / name).is_file():
+        if not source_file(name).is_file():
             raise ValueError(f"Missing packaged source: {name}")
         if dest.is_symlink():
             raise ValueError(f"Refusing symlink in installation: {name}")
@@ -118,7 +123,7 @@ def install(home: Path, project: str | None, apply: bool) -> dict:
         return {"status": "PREVIEW_ONLY", **plan}
     home.mkdir(parents=True, exist_ok=True)
     for name in FILES:
-        atomic_bytes(home / name, (SOURCE_DIR / name).read_bytes())
+        atomic_bytes(home / name, source_file(name).read_bytes())
     if not plan["preserve_config"]:
         data = {"schema": 1, "root": plan["project"], "allow_write": False,
                 "allow_checks": False}
