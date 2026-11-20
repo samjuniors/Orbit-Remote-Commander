@@ -23,6 +23,8 @@ class BuildTests(unittest.TestCase):
                 self.assertFalse(any(name.startswith("/") or ".." in Path(name).parts
                                      or name.endswith(".env") for name in f.namelist()))
                 self.assertIn("src/run_orbit_rc.py", f.namelist())
+                self.assertIn("THIRD_PARTY_NOTICES.md", f.namelist())
+                self.assertIn(b"MIT License", f.read("THIRD_PARTY_NOTICES.md"))
                 self.assertIn("Orbit Remote Setup.cmd", f.namelist())
             sha = a.with_name("a.zip.sha256").read_text()
             self.assertEqual(len(sha.split()[0]), 64)
