@@ -9,6 +9,9 @@
 | Check device/project access | `orbit_rc_status` |
 | List a bounded project directory | `orbit_rc_list` |
 | Read non-secret UTF-8 project text | `orbit_rc_read` |
+| Search filenames or text in a bounded project scope | `orbit_rc_search` (new source contract; live plugin unverified) |
+| Read-only exact block-edit preview | `orbit_rc_preview_edit` (new source contract; live plugin unverified) |
+| Surgically edit text only with validated approval and prior SHA | `orbit_rc_edit_block` (disabled by default) |
 | Edit a previously read text file (opt-in, separately approved) | `orbit_rc_write` |
 | Fixed Git diagnostics only (opt-in) | `orbit_rc_check` |
 
@@ -22,7 +25,7 @@ Tool names are provisional but intentionally stable throughout the v0.x local pr
 4. User/organization policy denial is **never** a failover trigger. On uncertain write completion, stop and inspect exact effects before a new attempt; never replay automatically.
 5. If no provider is authorized, report BLOCKED. A source file, plugin instruction, tool listing, or prior-session device state does not count as live connectivity.
 
-The private plugin v0.26.3 and later contains routing *instructions* and a bundled local prototype; its current connection status is not proof that ChatGPT can invoke any of these tools on a PC.
+The private plugin v0.26.3 and later provides routing *instructions* and links to this independent project rather than shipping the commander executable. The new search/edit tool contracts are implemented in the standalone source but require separate live connector tool discovery and compatibility tests; a private plugin skill alone does not make them accessible from ChatGPT web.
 
 ## Requirements before a public Orbit ChatGPT plugin can offer this feature
 
@@ -35,7 +38,7 @@ The private plugin v0.26.3 and later contains routing *instructions* and a bundl
 
 ## Compatibility levels
 
-- `DOCUMENTED` — shared tool names and intended semantics; **current**.
+- `DOCUMENTED` — shared tool names and intended semantics; **current**. Search/edit tools still require the ChatGPT plugin's tool inventory/compatibility acceptance.
 - `LOCAL_VERIFIED` — tests passed when explicitly launched in a supported local stdio host; not ChatGPT remote.
 - `REMOTE_CONNECTED` — real OAuth/HTTPS MCP, paired Windows device, working private ChatGPT session.
 - `PUBLIC_VERIFIED` — public plugin install, separate user consent, revocation, device isolation and production security acceptance.
