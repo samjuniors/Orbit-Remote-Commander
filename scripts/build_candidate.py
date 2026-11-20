@@ -16,6 +16,7 @@ PAYLOAD = (
     "docs/CHATGPT-COMPATIBILITY.md",
     "src/orbit_remote_commander.py",
     "src/orbit_remote_fallback.py",
+    "src/orbit_rc_text_ops.py",
     "src/run_orbit_rc.py",
     "tools/windows_setup.py",
     "tools/windows_setup_gui.pyw",
