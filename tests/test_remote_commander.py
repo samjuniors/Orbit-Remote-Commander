@@ -52,6 +52,16 @@ class CommanderTest(unittest.TestCase):
         with self.assertRaises(module.Rejected): self.com.read_text('link.txt')
         self.assertNotIn('link.txt', [x['name'] for x in self.com.list_dir()['entries']])
 
+    def test_secret_symlink_inside_project_is_denied(self):
+        alias = self.root / 'public.txt'
+        try:
+            alias.symlink_to(self.root / '.env')
+        except (OSError, NotImplementedError):
+            self.skipTest('No symlinks available')
+        with self.assertRaises(module.Rejected):
+            self.com.read_text('public.txt')
+        self.assertNotIn('public.txt', [x['name'] for x in self.com.list_dir()['entries']])
+
     def test_write_is_default_denied(self):
         expected = hashlib.sha256(b'hello').hexdigest()
         with self.assertRaises(module.Rejected): self.com.write_text('hello.txt', 'changed', expected, True)
