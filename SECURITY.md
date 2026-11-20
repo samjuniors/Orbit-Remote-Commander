@@ -8,6 +8,9 @@
 - File traversal, symlink escapes and common secret paths are denied; these are guardrails, **not OS sandbox isolation**. Run under an OS account with minimal access and use disposable test projects/VMs for untrusted code.
 - File writes require `ORBIT_RC_ALLOW_WRITE=1`, prior file SHA-256 and confirmation; the `confirm_write` argument **does not establish human consent**. Any real remote product needs independently enforced, device-side authorization.
 - Fixed Git diagnostics (disabled by default) may still read untrusted configuration or trigger helpers; they are not a security sandbox.
+- The DesktopCommander-inspired project search is **literal and bounded** (no arbitrary regex or whole-drive search). It validates project scope for each entry, excludes common secret paths and refuses symlink traversal; filename/content filters are still only defense in depth.
+- Adapted exact edit rejects unknown/fuzzy matches, checks expected occurrence counts and stale hashes, and preserves Windows line endings. Real write authorization must be enforced by the trusted host/device; the default launcher keeps all writes off.
+- The adapted upstream MIT code and copyright are documented in `THIRD_PARTY_NOTICES.md`, included in installation and packaging.
 - The source does not listen on a network port, create accounts, pair devices, grant permissions or run background services.
 
 ## Future public gateway controls
