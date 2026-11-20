@@ -5,8 +5,10 @@
 ```text
 Local MCP-capable host
    └─ (stdio, explicit opt-in)
-      ├─ orbit_rc_status/list/read/write/check
+      ├─ orbit_rc_status/list/read/search/preview_edit/write/edit_block/check
       ├─ project-root validation + secret-pattern guardrails
+      ├─ MIT-attributed exact block edit and line-ending preservation
+      ├─ bounded literal project search, without subprocess/regex
       ├─ optional SHA-guarded existing-file edits
       └─ optional fixed diagnostic subprocesses
 
@@ -16,7 +18,7 @@ Pure capability selector (does not start a process, perform pairing or grant per
    └─ otherwise: BLOCKED
 ```
 
-Source of truth: `src/`. The `tests/` folder checks local behavior. No auto-install, web relay, direct network socket, browser UI, or device registry exists.
+Source of truth: `src/`. The `tests/` folder checks local behavior. Research pinned to DesktopCommanderMCP commit `9a101b17`: [adoption decisions and security boundaries](RESEARCH-DESKTOPCOMMANDER-MCP.md). Upstream MIT copyright/licensing notice is carried with source and all installed/archived copies. No auto-install, web relay, direct network socket, browser UI, or device registry exists.
 
 ## Future remote path (NOT implemented)
 
