@@ -6,7 +6,7 @@ Upstream: https://github.com/wonderwhy-er/DesktopCommanderMCP
 Pinned source commit: 9a101b17e44577f0baefa4c7120f087881c5cc56
 Upstream files: src/utils/lineEndingHandler.ts, src/tools/edit.ts.
 Copyright (c) 2024-2025 Eduard Ruzga and Desktop Commander Contributors.
-Full MIT license: ../THIRD_PARTY_NOTICES.md
+Full MIT license: THIRD_PARTY_NOTICES.md (repository root and deployed alongside executor)
 
 This is a deliberately reduced, fail-closed Python adaptation: no fuzzy
 matching, no whole-disk access, and no standalone authorization mechanism.
