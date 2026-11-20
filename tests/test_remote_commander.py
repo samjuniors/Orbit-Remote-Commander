@@ -173,14 +173,24 @@ class CommanderTest(unittest.TestCase):
             {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'},
             {'jsonrpc': '2.0', 'id': 3, 'method': 'tools/call', 'params': {'name': 'orbit_rc_status', 'arguments': {}}},
             {'jsonrpc': '2.0', 'id': 4, 'method': 'tools/call', 'params': {'name': 'orbit_rc_read', 'arguments': {'path': '.env'}}},
+            {'jsonrpc': '2.0', 'id': 5, 'method': 'tools/call', 'params': {'name': 'orbit_rc_search', 'arguments': {'pattern': 'hello'}}},
+            {'jsonrpc': '2.0', 'id': 6, 'method': 'tools/call', 'params': {'name': 'orbit_rc_preview_edit', 'arguments': {'path': 'hello.txt', 'old_string': 'hello', 'new_string': 'world'}}},
+            {'jsonrpc': '2.0', 'id': 7, 'method': 'tools/call', 'params': {'name': 'orbit_rc_edit_block', 'arguments': {'path': 'hello.txt', 'old_string': 'hello', 'new_string': 'world', 'expected_sha256': hashlib.sha256(b'hello').hexdigest(), 'confirm_write': True}}},
         ]
         proc = subprocess.run([sys.executable, str(SOURCE)], input='\n'.join(json.dumps(m) for m in messages) + '\n',
                               capture_output=True, text=True, env=env, timeout=5)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         rows = [json.loads(line) for line in proc.stdout.splitlines()]
-        self.assertEqual([r['id'] for r in rows], [1, 2, 3, 4])
+        self.assertEqual([r['id'] for r in rows], [1, 2, 3, 4, 5, 6, 7])
         self.assertEqual(len(rows[1]['result']['tools']), 8)
         self.assertTrue(rows[3]['result']['isError'])
+        search = json.loads(rows[4]['result']['content'][0]['text'])
+        self.assertEqual(search['results'][0]['path'], 'hello.txt')
+        edit_preview = json.loads(rows[5]['result']['content'][0]['text'])
+        self.assertFalse(edit_preview['write_performed'])
+        self.assertEqual(edit_preview['replacements'], 1)
+        self.assertTrue(rows[6]['result']['isError'])
+        self.assertEqual((self.root / 'hello.txt').read_text(), 'hello')
 
 
 if __name__ == '__main__': unittest.main()
