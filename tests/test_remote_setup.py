@@ -41,6 +41,7 @@ class SetupTests(unittest.TestCase):
         self.assertFalse(setup.status(self.home)["remote_connected"])
         self.assertFalse(setup.status(self.home)["chatgpt_connected"])
         self.assertTrue((self.home / "run_orbit_rc.py").is_file())
+        self.assertIn("Eduard Ruzga", (self.home / "THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8"))
 
     def test_resinstall_preserves_config(self):
         setup.install(self.home, str(self.project), apply=True)
