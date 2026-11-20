@@ -8,10 +8,10 @@
 | --- | --- | --- |
 | Separate source repository, no Orbit Core dependency | PASS | Independent source/tests/docs/CI in this repository; Orbit Core PR #142 closed unmerged |
 | Local read/list, secret/traversal limits, SHA write guard | PASS (simulated tests) | Python unit tests and MCP stdio framing; local write remains disabled by Windows launcher |
-| DesktopCommanderMCP research and MIT source adaptation | SOURCE IMPLEMENTED | Pinned 9a101b17; exact block and line-ending logic ported, license retained in installed files and ZIP |
-| Bounded project search and exact block edit | TESTS ADDED, REVERIFY CI | Source tools `orbit_rc_search`, `orbit_rc_preview_edit`, `orbit_rc_edit_block`; no fuzzy matching, writes remain disabled by default |
+| DesktopCommanderMCP research and MIT source adaptation | PASS (source/license package tests) | Pinned 9a101b17; exact block and line-ending logic ported, MIT notice retained in installed files and ZIP |
+| Bounded project search and exact block edit | PASS (disposable Linux/Windows CI) | Source tools `orbit_rc_search`, `orbit_rc_preview_edit`, `orbit_rc_edit_block`; no fuzzy matching, writes remain disabled by default |
 | Source annotations for read/write tool safety | PASS (source) | MCP tools include readOnlyHint/destructiveHint; host permissions are independent |
-| Cross-platform CI with Windows | PASS (CI, see exact-head GitHub Actions) | GitHub Actions checks for Python 3.10–3.13 on Linux, 3.12 Windows; 40 tests each at prior implementation commit fa554576; revalidate exact-head CI following DesktopCommanderMCP adaptation |
+| Cross-platform CI with Windows | PASS (CI, see exact-head GitHub Actions) | GitHub Actions checks for Python 3.10–3.13 on Linux, 3.12 Windows; 54 tests each at implementation commit 5e767105 (GitHub Actions run 44744936414), including CRLF and RPC |
 | Windows preview/install/status/uninstall | PASS (disposable CI only) | Per-user install tests; no personal machine installation or GUI manual acceptance |
 | SHA-256 reproducible unsigned review package | PASS (unsigned candidate CI artifact) | CI artifact; not a signed or released installer |
 | Owner's actual Windows device installed and paired | NOT RUN | Currently remote device unavailable; requires operator consent |
