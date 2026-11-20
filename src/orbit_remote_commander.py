@@ -17,6 +17,8 @@ import sys
 import tempfile
 from typing import Any
 
+from orbit_rc_text_ops import BlockEditError, exact_block_replacement
+
 MAX_READ_BYTES = 96_000
 MAX_WRITE_BYTES = 96_000
 MAX_ENTRIES = 120
@@ -155,6 +157,135 @@ class Commander:
                 os.unlink(tempname)
         return {"path": path, "written": True, "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()}
 
+    def search_files(self, pattern: str, path: str = ".", mode: str = "content",
+                     case_sensitive: bool = False, max_results: int = 30) -> dict[str, Any]:
+        """Bounded literal project search, inspired by Desktop Commander's search tools.
+
+        No arbitrary regex, subprocess, symlink traversal, hidden disk search,
+        or returned contents from secret-like files. Counts represent budgets,
+        not a claim of exhaustive search on large repositories.
+        """
+        if not isinstance(pattern, str) or not pattern or "\n" in pattern or "\r" in pattern or len(pattern) > 128:
+            raise Rejected("Search requires a single-line literal pattern (1-128 characters)")
+        if mode not in ("content", "filename") or type(case_sensitive) is not bool:
+            raise Rejected("Unsupported search mode or case flag")
+        if type(max_results) is not int or not 1 <= max_results <= 40:
+            raise Rejected("max_results must be an integer from 1 to 40")
+        directory = self._path(path)
+        if not directory.is_dir():
+            raise Rejected("Search requires a directory inside the project")
+        from collections import deque
+        from itertools import islice
+        pending = deque([(directory, 0)])
+        results = []
+        entries_checked = 0
+        files_scanned = 0
+        bytes_scanned = 0
+        truncated = False
+        skipped_dirs = {".git", ".venv", "node_modules", "__pycache__", ".next", "dist", "build"}
+        needle = pattern if case_sensitive else pattern.casefold()
+        while pending and len(results) < max_results:
+            folder, depth = pending.popleft()
+            if entries_checked >= 600 or files_scanned >= 128 or bytes_scanned >= 1_000_000:
+                truncated = True
+                break
+            room = 600 - entries_checked
+            try:
+                with os.scandir(folder) as it:
+                    sample = list(islice(it, room + 1))
+            except OSError:
+                continue
+            if len(sample) > room:
+                truncated = True
+            for entry in sample[:room]:
+                entries_checked += 1
+                try:
+                    if entry.is_symlink():
+                        continue
+                    relative = Path(entry.path).relative_to(self.root).as_posix()
+                    target = self._path(relative)
+                    if target.is_dir():
+                        if entry.name not in skipped_dirs:
+                            if depth < 6:
+                                pending.append((target, depth + 1))
+                            else:
+                                truncated = True
+                        continue
+                    if not target.is_file():
+                        continue
+                    if mode == "filename":
+                        name = relative if case_sensitive else relative.casefold()
+                        if needle in name:
+                            results.append({"path": relative, "kind": "filename"})
+                    else:
+                        if files_scanned >= 128 or bytes_scanned >= 1_000_000:
+                            truncated = True
+                            break
+                        if target.stat().st_size > MAX_READ_BYTES:
+                            continue
+                        with target.open("rb") as source:
+                            data = source.read(MAX_READ_BYTES + 1)
+                        if len(data) > MAX_READ_BYTES or b"\x00" in data:
+                            continue
+                        files_scanned += 1
+                        bytes_scanned += len(data)
+                        try:
+                            lines = data.decode("utf-8").splitlines()
+                        except UnicodeDecodeError:
+                            continue
+                        for line_number, line in enumerate(lines, 1):
+                            subject = line if case_sensitive else line.casefold()
+                            if needle in subject:
+                                results.append({"path": relative, "line": line_number,
+                                                "preview": line[:200]})
+                                if len(results) >= max_results:
+                                    break
+                    if len(results) >= max_results:
+                        truncated = True
+                        break
+                except (Rejected, OSError, ValueError):
+                    continue
+            if entries_checked >= 600 and pending:
+                truncated = True
+        if pending:
+            truncated = True
+        return {"path": path, "mode": mode, "pattern": pattern, "results": results,
+                "entries_checked": entries_checked, "files_scanned": files_scanned,
+                "bytes_scanned": bytes_scanned, "possibly_truncated": truncated}
+
+    def preview_edit_block(self, path: str, old_string: str, new_string: str,
+                           expected_replacements: int = 1) -> dict[str, Any]:
+        """Preview an exact replacement, without enabling file modifications."""
+        current = self.read_text(path)
+        change = exact_block_replacement(current["text"], old_string, new_string,
+                                         expected_replacements, max_bytes=MAX_WRITE_BYTES)
+        return {"path": path, "expected_sha256": current["sha256"],
+                "proposed_sha256": hashlib.sha256(change["updated"].encode("utf-8")).hexdigest(),
+                "replacements": change["replacements"], "preview": change["preview"],
+                "preview_truncated": change["preview_truncated"],
+                "new_size": change["new_size"], "newline_style": change["newline_style"],
+                "write_performed": False}
+
+    def edit_block(self, path: str, old_string: str, new_string: str,
+                   expected_sha256: str, confirm_write: bool,
+                   expected_replacements: int = 1) -> dict[str, Any]:
+        """Exact surgical replacement, only with separately authorized writes.
+
+        This is not an authorization boundary: the host/device must independently
+        confirm a real user-approved write, and an installed launcher never
+        enables this tool.
+        """
+        if not self.allow_write or confirm_write is not True:
+            raise Rejected("Write mode and separate host-side approval required")
+        current = self.read_text(path)
+        if current["sha256"] != expected_sha256:
+            raise Rejected("File changed since preview; refusing stale overwrite")
+        change = exact_block_replacement(current["text"], old_string, new_string,
+                                         expected_replacements, max_bytes=MAX_WRITE_BYTES)
+        outcome = self.write_text(path, change["updated"], expected_sha256, confirm_write)
+        return {"path": path, "written": outcome["written"],
+                "sha256": outcome["sha256"], "replacements": change["replacements"]}
+
     def run_check(self, check: str) -> dict[str, Any]:
         if not self.allow_checks:
             raise Rejected("Diagnostic subprocesses disabled on this device")
@@ -185,6 +316,9 @@ TOOLS = [
     {"name": "orbit_rc_read", "description": "Read one non-sensitive UTF-8 file inside the configured project root; returns a hash for stale-write protection.", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"], "additionalProperties": False}, "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True}},
     {"name": "orbit_rc_write", "description": "Modify one existing text file only if device write mode is on, user separately approves and the previously-read SHA-256 matches. Not a general authorization mechanism.", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}, "text": {"type": "string"}, "expected_sha256": {"type": "string"}, "confirm_write": {"type": "boolean"}}, "required": ["path", "text", "expected_sha256", "confirm_write"], "additionalProperties": False}, "annotations": {"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False}},
     {"name": "orbit_rc_check", "description": "Run one fixed git diagnostic on the approved project; disabled by default. This is NOT arbitrary terminal access.", "inputSchema": {"type": "object", "properties": {"check": {"type": "string", "enum": ["git-status", "git-diff-stat", "git-branch"]}}, "required": ["check"], "additionalProperties": False}, "annotations": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False}},
+    {"name": "orbit_rc_search", "description": "Bounded literal filename or UTF-8 content search within the approved project. No regex or command execution.", "inputSchema": {"type": "object", "properties": {"pattern": {"type": "string"}, "path": {"type": "string"}, "mode": {"type": "string", "enum": ["content", "filename"]}, "case_sensitive": {"type": "boolean"}, "max_results": {"type": "integer", "minimum": 1, "maximum": 40}}, "required": ["pattern"], "additionalProperties": False}, "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True}},
+    {"name": "orbit_rc_preview_edit", "description": "Preview exact text block replacement without writing, including expected SHA-256 and CRLF preservation.", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}, "old_string": {"type": "string"}, "new_string": {"type": "string"}, "expected_replacements": {"type": "integer", "minimum": 1, "maximum": 8}}, "required": ["path", "old_string", "new_string"], "additionalProperties": False}, "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True}},
+    {"name": "orbit_rc_edit_block", "description": "Exact text replacement in an existing file only with independently approved write permission, prior SHA-256 and count check. Disabled by default.", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}, "old_string": {"type": "string"}, "new_string": {"type": "string"}, "expected_sha256": {"type": "string"}, "confirm_write": {"type": "boolean"}, "expected_replacements": {"type": "integer", "minimum": 1, "maximum": 8}}, "required": ["path", "old_string", "new_string", "expected_sha256", "confirm_write"], "additionalProperties": False}, "annotations": {"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False}},
 ]
 
 
@@ -212,6 +346,9 @@ def serve(commander: Commander) -> None:
                 handlers = {"orbit_rc_status": lambda: commander.status(),
                             "orbit_rc_list": lambda: commander.list_dir(args.get("path", ".")),
                             "orbit_rc_read": lambda: commander.read_text(args["path"]),
+                            "orbit_rc_search": lambda: commander.search_files(args["pattern"], args.get("path", "."), args.get("mode", "content"), args.get("case_sensitive", False), args.get("max_results", 30)),
+                            "orbit_rc_preview_edit": lambda: commander.preview_edit_block(args["path"], args["old_string"], args["new_string"], args.get("expected_replacements", 1)),
+                            "orbit_rc_edit_block": lambda: commander.edit_block(args["path"], args["old_string"], args["new_string"], args["expected_sha256"], args["confirm_write"], args.get("expected_replacements", 1)),
                             "orbit_rc_write": lambda: commander.write_text(args["path"], args["text"], args["expected_sha256"], args["confirm_write"]),
                             "orbit_rc_check": lambda: commander.run_check(args["check"])}
                 if name not in handlers:
@@ -219,7 +356,7 @@ def serve(commander: Commander) -> None:
                 try:
                     value = handlers[name]()
                     result = {"content": [{"type": "text", "text": json.dumps(value, ensure_ascii=False)}]}
-                except (Rejected, KeyError, TypeError, OSError) as exc:
+                except (Rejected, BlockEditError, KeyError, TypeError, OSError) as exc:
                     result = {"isError": True, "content": [{"type": "text", "text": f"DENIED: {type(exc).__name__}: {str(exc)}"}]}
             else:
                 reply = {"jsonrpc": "2.0", "id": msg_id, "error": {"code": -32601, "message": "Method not found"}}
