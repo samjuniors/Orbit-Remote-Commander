@@ -102,6 +102,67 @@ class CommanderTest(unittest.TestCase):
         with self.assertRaises(module.Rejected):
             com.write_text('large.txt', 'small', hashlib.sha256(data).hexdigest(), True)
 
+    def test_project_literal_filename_and_content_search(self):
+        (self.root / "notes.txt").write_text("first\nNeedle second\nthird needle\n", encoding="utf-8")
+        found = self.com.search_files("needle")
+        self.assertEqual([x["line"] for x in found["results"]], [2, 3])
+        names = self.com.search_files("NOTES.TXT", mode="filename")
+        self.assertEqual(names["results"][0]["path"], "notes.txt")
+        exact = self.com.search_files("needle", case_sensitive=True)
+        self.assertEqual([x["line"] for x in exact["results"]], [3])
+
+    def test_search_excludes_secret_and_symlink_escape(self):
+        (self.root / "allowed.txt").write_text("needle", encoding="utf-8")
+        (self.root / ".env").write_text("needle", encoding="utf-8")
+        other = Path(self.tmp.name) / "outside.txt"
+        other.write_text("needle", encoding="utf-8")
+        try:
+            (self.root / "pointer.txt").symlink_to(other)
+        except (OSError, NotImplementedError):
+            pass
+        result = self.com.search_files("needle")
+        self.assertEqual({x["path"] for x in result["results"]}, {"allowed.txt"})
+        names = self.com.search_files(".env", mode="filename")
+        self.assertEqual(names["results"], [])
+
+    def test_search_budgets_and_escape(self):
+        for pattern, kwargs in [("", {}), ("x\nx", {}), ("x", {"max_results": True}),
+                                ("x", {"max_results": 41}), ("x", {"mode": "regex"}),
+                                ("x", {"path": "../"})]:
+            with self.subTest(pattern=pattern, kwargs=kwargs):
+                with self.assertRaises(module.Rejected):
+                    self.com.search_files(pattern, **kwargs)
+        for i in range(60):
+            (self.root / f"search-{i}.txt").write_text("entry", encoding="utf-8")
+        result = self.com.search_files("entry", max_results=10)
+        self.assertEqual(len(result["results"]), 10)
+        self.assertTrue(result["possibly_truncated"])
+
+    def test_preview_and_surgical_edit(self):
+        (self.root / "edit.txt").write_bytes(b"head\r\nalpha\r\nend\r\n")
+        preview = self.com.preview_edit_block("edit.txt", "alpha\nend", "BETA\nlast")
+        self.assertFalse(preview["write_performed"])
+        self.assertEqual(preview["newline_style"], "CRLF")
+        self.assertEqual((self.root / "edit.txt").read_bytes(), b"head\r\nalpha\r\nend\r\n")
+        with self.assertRaises(module.Rejected):
+            self.com.edit_block("edit.txt", "alpha", "BETA", preview["expected_sha256"], True)
+        writer = module.Commander(self.root, allow_write=True)
+        with self.assertRaises(module.Rejected):
+            writer.edit_block("edit.txt", "alpha", "BETA", preview["expected_sha256"], False)
+        modified = writer.edit_block("edit.txt", "alpha\nend", "BETA\nlast",
+                                     preview["expected_sha256"], True)
+        self.assertTrue(modified["written"])
+        self.assertEqual((self.root / "edit.txt").read_bytes(), b"head\r\nBETA\r\nlast\r\n")
+        with self.assertRaises(module.Rejected):
+            writer.edit_block("edit.txt", "BETA", "BAD", preview["expected_sha256"], True)
+
+    def test_preview_denies_ambiguous_or_secret_edit(self):
+        (self.root / "repeat.txt").write_text("value value", encoding="utf-8")
+        with self.assertRaises(module.BlockEditError):
+            self.com.preview_edit_block("repeat.txt", "value", "new")
+        with self.assertRaises(module.Rejected):
+            self.com.preview_edit_block(".env", "hidden", "changed")
+
     def test_mcp_stdio_handshake(self):
         env = dict(os.environ, ORBIT_RC_ROOT=str(self.root))
         env.pop('ORBIT_RC_ALLOW_WRITE', None)
