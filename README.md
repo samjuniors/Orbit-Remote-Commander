@@ -69,7 +69,7 @@ This repository owns the remote-command companion, tests, security controls and 
 
 ## Security and roadmap
 
-Read [SECURITY.md](SECURITY.md) and [architecture/acceptance](docs/ARCHITECTURE-AND-ROADMAP.md) before enabling writes or expanding the protocol. No public network listener, hosted relay, installer, device pairing, GUI automation or unrestricted remote shell ships today.
+Read [SECURITY.md](SECURITY.md) and [architecture/acceptance](docs/ARCHITECTURE-AND-ROADMAP.md) before enabling writes or expanding the protocol. A local preview-first Windows setup exists, but no public network listener, hosted relay, device pairing, desktop GUI automation or unrestricted remote shell ships today.
 
 **Third-party source:** We researched and adapted **MIT-licensed** code from [wonderwhy-er/DesktopCommanderMCP at pinned commit 9a101b17](https://github.com/wonderwhy-er/DesktopCommanderMCP/tree/9a101b17e44577f0baefa4c7120f087881c5cc56). Its newline-handling and exact text-match logic are ported into `src/orbit_rc_text_ops.py`, with the upstream copyright and MIT license in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), included in installed files and the review ZIP. See [research and capability comparison](docs/RESEARCH-DESKTOPCOMMANDER-MCP.md).
 
