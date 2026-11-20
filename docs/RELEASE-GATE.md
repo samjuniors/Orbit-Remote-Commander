@@ -9,14 +9,14 @@
 | Separate source repository, no Orbit Core dependency | PASS | Independent source/tests/docs/CI in this repository; Orbit Core PR #142 closed unmerged |
 | Local read/list, secret/traversal limits, SHA write guard | PASS (simulated tests) | Python unit tests and MCP stdio framing; local write remains disabled by Windows launcher |
 | Source annotations for read/write tool safety | PASS (source) | MCP tools include readOnlyHint/destructiveHint; host permissions are independent |
-| Cross-platform CI with Windows | VERIFY AT CURRENT HEAD | GitHub Actions checks for Python 3.10–3.13 on Linux, 3.12 Windows |
+| Cross-platform CI with Windows | PASS (CI, source/tests head prior to this docs-only update) | GitHub Actions checks for Python 3.10–3.13 on Linux, 3.12 Windows; 38 tests each (GitHub Actions run 44742275416) |
 | Windows preview/install/status/uninstall | PASS (disposable CI only) | Per-user install tests; no personal machine installation or GUI manual acceptance |
-| SHA-256 reproducible unsigned review package | PASS (CI build when green) | CI artifact; not a signed or released installer |
+| SHA-256 reproducible unsigned review package | PASS (unsigned candidate CI artifact) | CI artifact; not a signed or released installer |
 | Owner's actual Windows device installed and paired | NOT RUN | Currently remote device unavailable; requires operator consent |
 | Private OpenAI Secure MCP Tunnel | NOT RUN | Requires user's Platform tunnel ID, locally stored runtime key, eligible ChatGPT workspace, real tool call |
 | Production HTTPS MCP gateway with OAuth | NOT IMPLEMENTED | Required for public plugin distribution; established IdP, access controls, threat model |
 | Multi-user/device pairing, revoke, expiry, replay protection | NOT IMPLEMENTED | Independent gateway and device tests, per-user project scoping |
-| Public plugin compatibility and consent | DOCUMENTED ONLY | ChatGPT plugin v0.26.3 instructions align with the local tools; live full MCP eligibility and tests must be confirmed |
+| Public plugin compatibility and consent | DOCUMENTED ONLY | ChatGPT plugin v0.26.3 and later instructions align with the local tools; live full MCP eligibility and tests must be confirmed |
 | Independent security review and signed public binaries | NOT RUN | External review, SBOM/provenance and Windows signing |
 | Owner release/merge approval | NOT GIVEN | Preserve draft PR; do not publish |
 
