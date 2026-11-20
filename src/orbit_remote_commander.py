@@ -67,6 +67,13 @@ class Commander:
             raise Rejected("Path unavailable or cannot be resolved") from exc
         if not candidate.is_relative_to(self.root):
             raise Rejected("Path escapes the approved root")
+        # Canonical target components matter too: an innocent-looking
+        # symlink may point to a forbidden .env or other secret inside root.
+        canonical_parts = [p.lower() for p in candidate.relative_to(self.root).parts]
+        if any(p in DENIED_COMPONENTS or p in SECRET_NAMES
+               or p.startswith(".env.") or p.endswith(SECRET_SUFFIXES)
+               for p in canonical_parts):
+            raise Rejected("Sensitive target files are not exposed")
         return candidate
 
     def status(self) -> dict[str, Any]:
@@ -143,9 +150,9 @@ class Commander:
             raise Rejected("Diagnostic subprocesses disabled on this device")
         # Fixed argv, no arbitrary shell, no arbitrary executable arguments.
         checks = {
-            "git-status": ["git", "--no-pager", "status", "--short"],
-            "git-diff-stat": ["git", "--no-pager", "diff", "--stat"],
-            "git-branch": ["git", "branch", "--show-current"],
+            "git-status": ["git", "-c", "core.fsmonitor=false", "--no-pager", "status", "--short", "--untracked-files=no"],
+            "git-diff-stat": ["git", "-c", "core.fsmonitor=false", "-c", "diff.external=", "--no-pager", "diff", "--no-ext-diff", "--no-textconv", "--stat"],
+            "git-branch": ["git", "-c", "core.fsmonitor=false", "branch", "--show-current"],
         }
         if check not in checks:
             raise Rejected("Unsupported diagnostic ID")
