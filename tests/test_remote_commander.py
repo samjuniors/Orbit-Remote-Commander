@@ -86,6 +86,21 @@ class CommanderTest(unittest.TestCase):
         for p in ['binary.bin', 'huge.txt']:
             with self.assertRaises(module.Rejected): self.com.read_text(p)
 
+    def test_large_directory_inventory_is_bounded(self):
+        for i in range(module.MAX_ENTRIES + 9):
+            (self.root / f'file-{i:03}.txt').write_text('x', encoding='utf-8')
+        result = self.com.list_dir()
+        self.assertLessEqual(len(result['entries']), module.MAX_ENTRIES)
+        self.assertTrue(result['possibly_truncated'])
+
+    def test_existing_large_file_cannot_be_overwritten(self):
+        big = self.root / 'large.txt'
+        data = b'x' * (module.MAX_READ_BYTES + 1)
+        big.write_bytes(data)
+        com = module.Commander(self.root, allow_write=True)
+        with self.assertRaises(module.Rejected):
+            com.write_text('large.txt', 'small', hashlib.sha256(data).hexdigest(), True)
+
     def test_mcp_stdio_handshake(self):
         env = dict(os.environ, ORBIT_RC_ROOT=str(self.root))
         env.pop('ORBIT_RC_ALLOW_WRITE', None)
