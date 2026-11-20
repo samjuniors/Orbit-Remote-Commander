@@ -84,23 +84,28 @@ class Commander:
         directory = self._path(path)
         if not directory.is_dir():
             raise Rejected("Not a directory")
+        # Read only a fixed number of directory entries; sorting a giant
+        # directory eagerly could exhaust RAM before the tool returns.
+        from itertools import islice
+        with os.scandir(directory) as scan:
+            sample = list(islice(scan, MAX_ENTRIES + 1))
+        more = len(sample) > MAX_ENTRIES
         items = []
-        for child in sorted(directory.iterdir(), key=lambda p: p.name.lower()):
+        for child in sorted(sample[:MAX_ENTRIES], key=lambda p: p.name.casefold()):
             try:
-                rel = child.relative_to(self.root).as_posix()
-                self._path(rel)
-                items.append({"name": child.name, "kind": "directory" if child.is_dir() else "file" if child.is_file() else "other"})
+                rel = (Path(directory) / child.name).relative_to(self.root).as_posix()
+                target = self._path(rel)
+                items.append({"name": child.name, "kind": "directory" if target.is_dir() else "file" if target.is_file() else "other"})
             except (Rejected, OSError, ValueError):
                 continue
-            if len(items) >= MAX_ENTRIES:
-                break
-        return {"path": path, "entries": items, "limit": MAX_ENTRIES, "possibly_truncated": len(items) == MAX_ENTRIES}
+        return {"path": path, "entries": items, "limit": MAX_ENTRIES, "possibly_truncated": more}
 
     def read_text(self, path: str) -> dict[str, Any]:
         file = self._path(path)
         if not file.is_file() or file.stat().st_size > MAX_READ_BYTES:
             raise Rejected("File missing, not regular, or exceeds read limit")
-        data = file.read_bytes()
+        with file.open("rb") as inp:
+            data = inp.read(MAX_READ_BYTES + 1)
         if len(data) > MAX_READ_BYTES:
             raise Rejected("File exceeds read limit")
         try:
@@ -121,7 +126,12 @@ class Commander:
         target = self._path(path)
         if not target.is_file():
             raise Rejected("Only existing regular text files may be modified")
-        old = target.read_bytes()
+        if target.stat().st_size > MAX_READ_BYTES:
+            raise Rejected("Existing file exceeds safe edit limit")
+        with target.open("rb") as inp:
+            old = inp.read(MAX_READ_BYTES + 1)
+        if len(old) > MAX_READ_BYTES:
+            raise Rejected("Existing file exceeds safe edit limit")
         if hashlib.sha256(old).hexdigest() != expected_sha256:
             raise Rejected("File changed since read; refusing stale overwrite")
         try:
