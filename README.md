@@ -38,6 +38,26 @@ Run tests:
 python -m unittest discover -s tests -p 'test_remote_*.py' -v
 ```
 
+## Windows local setup (development candidate)
+
+The repository now includes a **preview-first one-click local installer**, independent of Orbit Core. After an authorized review of the source or CI artifact, a Windows user can open **Orbit Remote Setup.cmd**, select one trusted project folder, preview the file changes and explicitly install. The program files go under the current user's LOCALAPPDATA/OrbitRemoteCommander folder. The setup never changes other IDEs, installs a background daemon, opens ports or silently enables writes. It also provides Status and Uninstall controls. Keep important user files outside that install folder.
+
+For terminal-only setup, use Python 3.10+:
+
+~~~text
+python tools/windows_setup.py install --project "C:\full\path\to\disposable-project"
+python tools/windows_setup.py install --project "C:\full\path\to\disposable-project" --apply
+python tools/windows_setup.py status
+python tools/windows_setup.py uninstall
+python tools/windows_setup.py uninstall --apply
+~~~
+
+A local stdio MCP host can then invoke the installed run_orbit_rc.py in that per-user directory. **No actual ChatGPT connection is created by installing these files.** The launcher forces read-only mode even when the JSON config contains unsupported privilege flags.
+
+To make an eligible private ChatGPT connection, review the [Secure MCP Tunnel setup and prerequisites](docs/PRIVATE-TUNNEL-SETUP.md). A separate public OAuth HTTPS gateway is still required before publicly distributing the Orbit ChatGPT plugin with this remote-access capability.
+
+The standalone CI builds a reproducible **unsigned development candidate ZIP** with SHA-256 as a short-lived reviewer artifact; this is not a signed public release.
+
 ## Orbit ChatGPT plugin compatibility
 
 The current private Orbit ChatGPT plugin v0.26.3 documents an optional fallback using these `orbit_rc_*` tool names. **The tool contract is aligned at the source/instruction level, not yet proven in live ChatGPT remote sessions.** For future public-plugin support, this project will provide an independently authenticated, opt-in device integration rather than asking users to install or connect Desktop Commander. See [ChatGPT compatibility](docs/CHATGPT-COMPATIBILITY.md), including planned OAuth, pairing, privacy and release gates.
