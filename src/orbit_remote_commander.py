@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import stat
 import subprocess
 import sys
@@ -49,12 +49,22 @@ class Commander:
         if not isinstance(rel, str) or not rel or "\x00" in rel or len(rel) > 2048:
             raise Rejected("Path must be a non-empty relative string")
         supplied = Path(rel)
-        if supplied.is_absolute() or any(p == ".." for p in supplied.parts):
+        posix = PurePosixPath(rel)
+        windows = PureWindowsPath(rel)
+        # Validate BOTH path grammars before touching disk: a POSIX absolute
+        # path looks relative on Windows, and Windows drive/UNC paths look
+        # relative on POSIX. Backslash traversal must be rejected on POSIX too.
+        if (posix.is_absolute() or windows.is_absolute() or windows.drive
+                or rel.startswith(("/", "\\")) or
+                any(".." in parsed.parts for parsed in (posix, windows))):
             raise Rejected("Absolute paths and traversal are not permitted")
-        parts = [p.lower() for p in supplied.parts]
+        parts = [p.lower() for parsed in (posix, windows) for p in parsed.parts]
         if any(p in DENIED_COMPONENTS for p in parts) or any(p in SECRET_NAMES or p.startswith(".env.") or p.endswith(SECRET_SUFFIXES) for p in parts):
             raise Rejected("Sensitive files are not exposed")
-        candidate = (self.root / supplied).resolve(strict=require_exists)
+        try:
+            candidate = (self.root / supplied).resolve(strict=require_exists)
+        except (OSError, RuntimeError) as exc:
+            raise Rejected("Path unavailable or cannot be resolved") from exc
         if not candidate.is_relative_to(self.root):
             raise Rejected("Path escapes the approved root")
         return candidate
