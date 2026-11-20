@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = (
     "Orbit Remote Setup.cmd",
     "README.md",
+    "THIRD_PARTY_NOTICES.md",
     "SECURITY.md",
     "docs/ARCHITECTURE-AND-ROADMAP.md",
     "docs/CHATGPT-COMPATIBILITY.md",
