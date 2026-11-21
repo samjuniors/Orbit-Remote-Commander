@@ -108,6 +108,51 @@ class GatewayTests(unittest.TestCase):
             )
         self.assertEqual(response.status_code, 401)
 
+    def test_authorized_http_client_can_read_but_not_write(self):
+        from mcp.server.transport_security import TransportSecuritySettings
+
+        app = self.server.streamable_http_app(
+            json_response=True,
+            stateless_http=True,
+            host="127.0.0.1",
+            transport_security=TransportSecuritySettings(
+                enable_dns_rebinding_protection=True,
+                allowed_hosts=["orbit.example.com"],
+                allowed_origins=[],
+            ),
+        )
+        headers = {
+            "Authorization": "Bearer TEST-ONLY-VALID-TOKEN",
+            "Host": "orbit.example.com",
+            "Accept": "application/json, text/event-stream",
+            "Content-Type": "application/json",
+            "MCP-Protocol-Version": "2026-07-28",
+        }
+        with TestClient(app) as client:
+            def rpc(method, params=None, ident=1):
+                return client.post("/mcp", headers=headers, json={
+                    "jsonrpc": "2.0", "id": ident, "method": method,
+                    "params": {} if params is None else params,
+                })
+
+            init = rpc("initialize", {
+                "protocolVersion": "2026-07-28",
+                "capabilities": {},
+                "clientInfo": {"name": "test", "version": "1"},
+            })
+            self.assertEqual(init.status_code, 200, init.text)
+            inventory = rpc("tools/list", ident=2)
+            self.assertEqual(inventory.status_code, 200, inventory.text)
+            names = {t["name"] for t in inventory.json()["result"]["tools"]}
+            self.assertIn("orbit_rc_read", names)
+            self.assertNotIn("orbit_rc_write", names)
+            data = rpc("tools/call", {
+                "name": "orbit_rc_read", "arguments": {"path": "hello.txt"},
+            }, ident=3)
+            self.assertEqual(data.status_code, 200, data.text)
+            self.assertIn("hello", data.text)
+            self.assertNotIn("isError", data.text)
+
     def test_oauth_protected_resource_metadata_contains_issuer(self):
         app = self.server.streamable_http_app(
             json_response=True, stateless_http=True, host="127.0.0.1"
