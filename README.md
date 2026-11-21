@@ -2,7 +2,7 @@
 
 **Independent, optional PC-access companion for Orbit — separate from [Orbit Core](https://github.com/samjuniors/Orbit-Core) and designed for future compatibility with the [Orbit ChatGPT plugin](docs/CHATGPT-COMPATIBILITY.md).**
 
-**Status: local-only MCP prototype. Remote ChatGPT access and automatic failover are NOT yet operational.**
+**Status: local stdio MCP plus an experimental OAuth-protected read-only HTTP MCP gateway. Live ChatGPT-to-PC access and automatic failover are NOT yet connected or verified.**
 
 Orbit Remote Commander aims to let authorized users inspect and, with additional approval, modify files in a selected project when a preferred device connector (such as Desktop Commander) is unavailable. It is not a fork of Desktop Commander and does not use Desktop Commander credentials or infrastructure.
 
@@ -14,6 +14,12 @@ Orbit Remote Commander aims to let authorized users inspect and, with additional
 - Optional, disabled-by-default fixed Git diagnostics (not arbitrary terminal access).
 - A pure fallback-selection policy: prefer an online/authorized primary, use an independently connected Orbit fallback only for actual availability failures, never circumvent denials or replay uncertain writes.
 - Local stdio MCP tools: `orbit_rc_status`, `orbit_rc_list`, `orbit_rc_read`, `orbit_rc_search`, `orbit_rc_preview_edit`, `orbit_rc_write`, `orbit_rc_edit_block`, `orbit_rc_check`.
+
+## Optional remote MCP over Cloudflare Tunnel
+
+The standalone source now has an optional **read-only HTTP MCP gateway**, built using the official MCP Python SDK v2 and an externally configured OAuth provider. It verifies access-token signature, issuer, exact resource audience, owner subject, scope and expiry. It runs on localhost, and an independently authorized Cloudflare named tunnel may forward HTTPS requests to it. It never exposes editing, shell or process tools.
+
+Cloudflare's tunnel transport can use a free plan, but a stable hostname needs a domain you control, and OAuth-provider and ChatGPT plan costs are separate. [Architecture, cost, setup and strict security gates](docs/CLOUDFLARE-REMOTE-MCP.md). No tunnel, authentication provider or PC connection is created automatically.
 
 ## Getting started (local development only)
 
@@ -69,7 +75,7 @@ This repository owns the remote-command companion, tests, security controls and 
 
 ## Security and roadmap
 
-Read [SECURITY.md](SECURITY.md) and [architecture/acceptance](docs/ARCHITECTURE-AND-ROADMAP.md) before enabling writes or expanding the protocol. A local preview-first Windows setup exists, but no public network listener, hosted relay, device pairing, desktop GUI automation or unrestricted remote shell ships today.
+Read [SECURITY.md](SECURITY.md) and [architecture/acceptance](docs/ARCHITECTURE-AND-ROADMAP.md) before enabling writes or expanding the protocol. A local preview-first Windows setup exists, including optional remote source files. No public inbound server port, hosted multi-user relay, device pairing, desktop GUI automation or unrestricted remote shell ships today. The read-only OAuth server only binds to localhost and requires separately authorized outbound tunnel setup.
 
 **Third-party source:** We researched and adapted **MIT-licensed** code from [wonderwhy-er/DesktopCommanderMCP at pinned commit 9a101b17](https://github.com/wonderwhy-er/DesktopCommanderMCP/tree/9a101b17e44577f0baefa4c7120f087881c5cc56). Its newline-handling and exact text-match logic are ported into `src/orbit_rc_text_ops.py`, with the upstream copyright and MIT license in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), included in installed files and the review ZIP. See [research and capability comparison](docs/RESEARCH-DESKTOPCOMMANDER-MCP.md).
 
