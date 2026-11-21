@@ -17,11 +17,11 @@ import tempfile
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_DIR = REPO_ROOT / "src"
-FILES = ("orbit_remote_commander.py", "orbit_remote_fallback.py", "orbit_rc_text_ops.py", "run_orbit_rc.py", "THIRD_PARTY_NOTICES.md")
+FILES = ("orbit_remote_commander.py", "orbit_remote_fallback.py", "orbit_rc_text_ops.py", "run_orbit_rc.py", "orbit_rc_gateway.py", "orbit_rc_oidc.py", "orbit_rc_remote_config.py", "requirements-remote.txt", "THIRD_PARTY_NOTICES.md")
 
 
 def source_file(name: str) -> Path:
-    return (REPO_ROOT if name == "THIRD_PARTY_NOTICES.md" else SOURCE_DIR) / name
+    return (REPO_ROOT if name in {"THIRD_PARTY_NOTICES.md", "requirements-remote.txt"} else SOURCE_DIR) / name
 CONFIG_FILE = "config.json"
 MANIFEST_FILE = ".orbit_rc_install.json"
 
