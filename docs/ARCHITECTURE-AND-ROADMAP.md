@@ -20,7 +20,11 @@ Pure capability selector (does not start a process, perform pairing or grant per
 
 Source of truth: `src/`. The `tests/` folder checks local behavior. Research pinned to DesktopCommanderMCP commit `9a101b17`: [adoption decisions and security boundaries](RESEARCH-DESKTOPCOMMANDER-MCP.md). Upstream MIT copyright/licensing notice is carried with source and all installed/archived copies. No auto-install, web relay, direct network socket, browser UI, or device registry exists.
 
-## Future remote path (NOT implemented)
+## Optional private read-only HTTP path (source implemented, live testing pending)
+
+A separate official MCP Python SDK v2 OAuth resource server at src/orbit_rc_gateway.py binds to 127.0.0.1 only, rejects unauthenticated HTTP, and exports only status/list/read/search/preview. An owner-managed named Cloudflare Tunnel can forward a stable HTTPS hostname; it cannot grant permissions. Access requires an independently configured external OAuth provider and signed JWT scoped to the exact resource/owner. See [private Cloudflare configuration](CLOUDFLARE-REMOTE-MCP.md). No real tunnel/PC/ChatGPT connection was made by committing this code.
+
+## Future public multi-user remote path (NOT implemented)
 
 ```text
 Orbit ChatGPT plugin (private now, public later)
