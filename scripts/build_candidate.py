@@ -15,11 +15,17 @@ PAYLOAD = (
     "SECURITY.md",
     "docs/ARCHITECTURE-AND-ROADMAP.md",
     "docs/CHATGPT-COMPATIBILITY.md",
+    "docs/CLOUDFLARE-REMOTE-MCP.md",
+    "requirements-remote.txt",
     "src/orbit_remote_commander.py",
     "src/orbit_remote_fallback.py",
     "src/orbit_rc_text_ops.py",
+    "src/orbit_rc_gateway.py",
+    "src/orbit_rc_oidc.py",
+    "src/orbit_rc_remote_config.py",
     "src/run_orbit_rc.py",
     "tools/windows_setup.py",
+    "tools/remote_tunnel.py",
     "tools/windows_setup_gui.pyw",
 )
 NAME = "Orbit-Remote-Commander-CANDIDATE.zip"
