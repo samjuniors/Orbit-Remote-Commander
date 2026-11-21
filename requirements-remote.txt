@@ -1,0 +1,4 @@
+# Optional remote gateway only; local stdio needs only Python 3.10+
+# Versioned against the official 2026 MCP Python SDK v2 documentation.
+mcp==2.3.0
+PyJWT[crypto]>=2.10,<3
