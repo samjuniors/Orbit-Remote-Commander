@@ -52,4 +52,6 @@ The private plugin v0.26.3 and later provides routing *instructions* and links t
 - Orbit Core: independent local-first orchestrator; no required dependency on this remote commander.
 - Desktop Commander: optional third-party primary, never a dependency or an authentication/transport component.
 
+The standalone repository now includes an **optional read-only OAuth MCP resource server** for owner-managed named Cloudflare Tunnels. It uses the official MCP SDK and externally issued signed JWTs; however no OAuth issuer, public hostname, owner PC or ChatGPT connector is configured by this source. The private Orbit plugin's routing instructions remain a future integration until live connection/permissions tests are completed. See [remote setup](CLOUDFLARE-REMOTE-MCP.md).
+
 The future publicly distributed ChatGPT plugin can interoperate with this project via the documented MCP tools, but compatibility must be proven against each actual release and connection type.
