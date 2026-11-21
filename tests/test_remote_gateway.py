@@ -54,7 +54,7 @@ class GatewayTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_remote_tool_surface_is_read_only(self):
-        names = {tool.name for tool in self.server.list_tools()}
+        names = {tool.name for tool in asyncio.run(self.server.list_tools())}
         self.assertEqual(names, {
             "orbit_rc_status",
             "orbit_rc_list",
