@@ -41,6 +41,9 @@ class SetupTests(unittest.TestCase):
         self.assertFalse(setup.status(self.home)["remote_connected"])
         self.assertFalse(setup.status(self.home)["chatgpt_connected"])
         self.assertTrue((self.home / "run_orbit_rc.py").is_file())
+        self.assertTrue((self.home / "orbit_rc_gateway.py").is_file())
+        self.assertTrue((self.home / "orbit_rc_remote_config.py").is_file())
+        self.assertTrue((self.home / "requirements-remote.txt").is_file())
         self.assertIn("Eduard Ruzga", (self.home / "THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8"))
 
     def test_resinstall_preserves_config(self):
