@@ -107,7 +107,7 @@ class OIDCTest(unittest.TestCase):
 
     def test_denies_alternate_signature_or_algorithm(self):
         self.assertIsNone(self.verifier.verify(self.token(private_key=self.other_private)))
-        hs = jwt.encode(self.claims(), "secret", algorithm="HS256", headers={"kid": "testkey"})
+        hs = jwt.encode(self.claims(), "secret" * 10, algorithm="HS256", headers={"kid": "testkey"})
         self.assertIsNone(self.verifier.verify(hs))
 
     def test_denies_missing_kid_and_invalid_tokens(self):
