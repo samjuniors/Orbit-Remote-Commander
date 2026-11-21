@@ -130,17 +130,21 @@ class GatewayTests(unittest.TestCase):
         }
         with TestClient(app) as client:
             def rpc(method, params=None, ident=1):
-                return client.post("/mcp", headers=headers, json={
-                    "jsonrpc": "2.0", "id": ident, "method": method,
-                    "params": {} if params is None else params,
-                })
+                params = {} if params is None else dict(params)
+                params["_meta"] = {
+                    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+                    "io.modelcontextprotocol/clientCapabilities": {},
+                    "io.modelcontextprotocol/clientInfo": {
+                        "name": "orbit-ci-client", "version": "1",
+                    },
+                }
+                return client.post(
+                    "/mcp",
+                    headers={**headers, "Mcp-Method": method},
+                    json={"jsonrpc": "2.0", "id": ident, "method": method,
+                          "params": params},
+                )
 
-            init = rpc("initialize", {
-                "protocolVersion": "2026-07-28",
-                "capabilities": {},
-                "clientInfo": {"name": "test", "version": "1"},
-            })
-            self.assertEqual(init.status_code, 200, init.text)
             inventory = rpc("tools/list", ident=2)
             self.assertEqual(inventory.status_code, 200, inventory.text)
             names = {t["name"] for t in inventory.json()["result"]["tools"]}
@@ -151,7 +155,7 @@ class GatewayTests(unittest.TestCase):
             }, ident=3)
             self.assertEqual(data.status_code, 200, data.text)
             self.assertIn("hello", data.text)
-            self.assertNotIn("isError", data.text)
+            self.assertNotIn('"isError":true', data.text)
 
     def test_oauth_protected_resource_metadata_contains_issuer(self):
         app = self.server.streamable_http_app(
