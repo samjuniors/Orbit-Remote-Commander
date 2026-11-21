@@ -11,7 +11,9 @@
 - The DesktopCommander-inspired project search is **literal and bounded** (no arbitrary regex or whole-drive search). It validates project scope for each entry, excludes common secret paths and refuses symlink traversal; filename/content filters are still only defense in depth.
 - Adapted exact edit rejects unknown/fuzzy matches, checks expected occurrence counts and stale hashes, and preserves Windows line endings. Real write authorization must be enforced by the trusted host/device; the default launcher keeps all writes off.
 - The adapted upstream MIT code and copyright are documented in `THIRD_PARTY_NOTICES.md`, included in installation and packaging.
-- The source does not listen on a network port, create accounts, pair devices, grant permissions or run background services.
+- The default stdio server does not open a network port. An **optional explicitly launched** OAuth resource server binds only to 127.0.0.1, uses the official MCP SDK, and can be reached through a separately configured outbound tunnel. Its HTTP surface is strictly read-only.
+- The HTTP endpoint verifies signed RS256 access JWTs against a configured HTTPS JWKS, checking issuer, audience, owner subject, client, scope and lifetime; Cloudflare forwarding does **not** grant access. No OAuth issuer, token, domain or pairing state is bundled with the source.
+- JWTs remain valid until expiry if not separately revoked; the first private setup has no multi-device pairing, server-side revocation list or independent security audit. Stop both local gateway and tunnel immediately if access must end, and revoke at the external IdP.
 
 ## Future public gateway controls
 
