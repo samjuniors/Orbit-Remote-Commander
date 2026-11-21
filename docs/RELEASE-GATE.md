@@ -11,12 +11,12 @@
 | DesktopCommanderMCP research and MIT source adaptation | PASS (source/license package tests) | Pinned 9a101b17; exact block and line-ending logic ported, MIT notice retained in installed files and ZIP |
 | Bounded project search and exact block edit | PASS (disposable Linux/Windows CI) | Source tools `orbit_rc_search`, `orbit_rc_preview_edit`, `orbit_rc_edit_block`; no fuzzy matching, writes remain disabled by default |
 | Source annotations for read/write tool safety | PASS (source) | MCP tools include readOnlyHint/destructiveHint; host permissions are independent |
-| Cross-platform CI with Windows | PASS (CI, see exact-head GitHub Actions) | GitHub Actions checks for Python 3.10–3.13 on Linux, 3.12 Windows; 54 tests each at implementation commit 5e767105 (GitHub Actions run 44744936414), including CRLF and RPC |
+| Cross-platform CI with Windows | PASS (CI, see exact-head GitHub Actions) | GitHub Actions checks for Python 3.10–3.13 on Linux, 3.12 Windows; 74 tests each at remote gateway implementation head 60357ae (GitHub Actions run 44848436057), including authenticated/unauthenticated MCP HTTP, OAuth JWT, named-tunnel preview, Windows setup and build |
 | Windows preview/install/status/uninstall | PASS (disposable CI only) | Per-user install tests; no personal machine installation or GUI manual acceptance |
 | SHA-256 reproducible unsigned review package | PASS (unsigned candidate CI artifact) | CI artifact; not a signed or released installer |
 | Owner's actual Windows device installed and paired | NOT RUN | Currently remote device unavailable; requires operator consent |
-| Cloudflare named tunnel config generator | SOURCE + TESTS | Non-destructive preview-only configuration, stable domain and local host; no live tunnel |
-| OAuth Streamable HTTP single-owner resource server | SOURCE + TESTS | Official MCP SDK v2, issuer/audience/owner/scope/expiry validation and read-only tool inventory; no real PC acceptance |
+| Cloudflare named tunnel config generator | PASS (disposable CI) | Non-destructive preview-only configuration, stable domain and local host; no live tunnel |
+| OAuth Streamable HTTP single-owner resource server | PASS (disposable CI; live NOT RUN) | Official MCP SDK v2, issuer/audience/owner/scope/expiry validation and read-only tool inventory; no real PC acceptance |
 | Private OpenAI Secure MCP Tunnel | NOT RUN | Requires user's Platform tunnel ID, locally stored runtime key, eligible ChatGPT workspace, real tool call |
 | Production HTTPS MCP gateway with OAuth | NOT IMPLEMENTED | Required for public plugin distribution; established IdP, access controls, threat model |
 | Multi-user/device pairing, revoke, expiry, replay protection | NOT IMPLEMENTED | Independent gateway and device tests, per-user project scoping |
