@@ -138,9 +138,12 @@ class GatewayTests(unittest.TestCase):
                         "name": "orbit-ci-client", "version": "1",
                     },
                 }
+                wire_headers = {**headers, "Mcp-Method": method}
+                if method == "tools/call":
+                    wire_headers["Mcp-Name"] = params["name"]
                 return client.post(
                     "/mcp",
-                    headers={**headers, "Mcp-Method": method},
+                    headers=wire_headers,
                     json={"jsonrpc": "2.0", "id": ident, "method": method,
                           "params": params},
                 )
