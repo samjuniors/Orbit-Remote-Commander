@@ -23,6 +23,10 @@ class BuildTests(unittest.TestCase):
                 self.assertFalse(any(name.startswith("/") or ".." in Path(name).parts
                                      or name.endswith(".env") for name in f.namelist()))
                 self.assertIn("src/run_orbit_rc.py", f.namelist())
+                self.assertIn("src/orbit_rc_gateway.py", f.namelist())
+                self.assertIn("src/orbit_rc_oidc.py", f.namelist())
+                self.assertIn("tools/remote_tunnel.py", f.namelist())
+                self.assertIn("requirements-remote.txt", f.namelist())
                 self.assertIn("THIRD_PARTY_NOTICES.md", f.namelist())
                 self.assertIn(b"MIT License", f.read("THIRD_PARTY_NOTICES.md"))
                 self.assertIn("Orbit Remote Setup.cmd", f.namelist())
