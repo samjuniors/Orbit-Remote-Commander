@@ -15,6 +15,8 @@
 | Windows preview/install/status/uninstall | PASS (disposable CI only) | Per-user install tests; no personal machine installation or GUI manual acceptance |
 | SHA-256 reproducible unsigned review package | PASS (unsigned candidate CI artifact) | CI artifact; not a signed or released installer |
 | Owner's actual Windows device installed and paired | NOT RUN | Currently remote device unavailable; requires operator consent |
+| Cloudflare named tunnel config generator | SOURCE + TESTS | Non-destructive preview-only configuration, stable domain and local host; no live tunnel |
+| OAuth Streamable HTTP single-owner resource server | SOURCE + TESTS | Official MCP SDK v2, issuer/audience/owner/scope/expiry validation and read-only tool inventory; no real PC acceptance |
 | Private OpenAI Secure MCP Tunnel | NOT RUN | Requires user's Platform tunnel ID, locally stored runtime key, eligible ChatGPT workspace, real tool call |
 | Production HTTPS MCP gateway with OAuth | NOT IMPLEMENTED | Required for public plugin distribution; established IdP, access controls, threat model |
 | Multi-user/device pairing, revoke, expiry, replay protection | NOT IMPLEMENTED | Independent gateway and device tests, per-user project scoping |
