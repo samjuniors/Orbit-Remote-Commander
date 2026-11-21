@@ -1,0 +1,64 @@
+name: Remote Commander CI
+
+on:
+  push:
+    branches: [main, "feature/**", "fix/**"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  local-contract:
+    name: Local contract / ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.10"
+          - os: ubuntu-latest
+            python-version: "3.11"
+          - os: ubuntu-latest
+            python-version: "3.12"
+          - os: ubuntu-latest
+            python-version: "3.13"
+          - os: windows-latest
+            python-version: "3.12"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install optional remote MCP security test dependencies
+        run: python -m pip install -r requirements-remote.txt
+      - name: Compile sources and tests
+        run: python -m compileall -q src tests tools scripts
+      - name: Compile optional Windows GUI
+        run: python -m py_compile tools/windows_setup_gui.pyw
+      - name: Run unit and MCP-stdio protocol tests
+        run: python -m unittest discover -s tests -p "test_remote_*.py" -v
+      - name: Build unsigned reproducible review artifact
+        run: python scripts/build_candidate.py
+      - name: Upload candidate for reviewer only (not released)
+        if: github.event_name == 'pull_request' && matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: orbit-remote-commander-unsigned-candidate
+          path: |
+            dist/Orbit-Remote-Commander-CANDIDATE.zip
+            dist/Orbit-Remote-Commander-CANDIDATE.zip.sha256
+          if-no-files-found: error
+          retention-days: 7
+      - name: Verify independent repo boundaries
+        shell: python
+        run: |
+          from pathlib import Path
+          assert Path("src/orbit_remote_commander.py").is_file()
+          assert Path("src/orbit_remote_fallback.py").is_file()
+          assert not Path("source/runtime/orbit_mcp.py").exists()
+          assert not Path("installer.py").exists()
+          assert Path("docs/CHATGPT-COMPATIBILITY.md").is_file()
+          print("Standalone boundaries present; no Orbit Core runtime packaged")
