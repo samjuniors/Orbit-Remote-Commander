@@ -14,7 +14,7 @@
 | Cross-platform CI with Windows | PASS (CI, see exact-head GitHub Actions) | GitHub Actions checks for Python 3.10–3.13 on Linux, 3.12 Windows; 74 tests each at remote gateway implementation head 60357ae (GitHub Actions run 44848436057), including authenticated/unauthenticated MCP HTTP, OAuth JWT, named-tunnel preview, Windows setup and build |
 | Windows preview/install/status/uninstall | PASS (disposable CI only) | Per-user install tests; no personal machine installation or GUI manual acceptance |
 | SHA-256 reproducible unsigned review package | PASS (unsigned candidate CI artifact) | CI artifact; not a signed or released installer |
-| Owner's actual Windows device installed and paired | NOT RUN | Currently remote device unavailable; requires operator consent |
+| Actual Windows device and disposable local acceptance | PASS (local only, NOT paired to standalone remote MCP) | [2026-11-21 Remote Arc Windows evidence](REMOTE-ARC-WINDOWS-ACCEPTANCE-20261121.md): 74 tests (4 skipped), preview/install/read/write-denial. Does not imply live ChatGPT connection |
 | Cloudflare named tunnel config generator | PASS (disposable CI) | Non-destructive preview-only configuration, stable domain and local host; no live tunnel |
 | OAuth Streamable HTTP single-owner resource server | PASS (disposable CI; live NOT RUN) | Official MCP SDK v2, issuer/audience/owner/scope/expiry validation and read-only tool inventory; no real PC acceptance |
 | Private OpenAI Secure MCP Tunnel | NOT RUN | Requires user's Platform tunnel ID, locally stored runtime key, eligible ChatGPT workspace, real tool call |
